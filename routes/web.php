@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Models\Task;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +15,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    $tasks = Task::orderBy('created_at', 'asc')->get();
 
-Route::view('/', 'welcome');
+    return view('tasks', [
+        'tasks' => $tasks
+    ]);
+});
+
+Route::post('/task', function (Request $request) {
+    $request->validate([
+        'name' => 'required|max:255',
+    ]);
+
+    $task = new Task;
+    $task->name = $request->name;
+    $task->save();
+
+    return redirect('/');
+});
+
+Route::delete('/task/{id}', function ($id) {
+    Task::findOrFail($id)->delete();
+
+    return redirect('/');
+});
